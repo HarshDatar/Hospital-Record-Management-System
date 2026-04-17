@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CarePlus Multispeciality Hospital — DBMS</title>
+  <style>
+    :root{--bg:#0a0f12;--panel:#0f151a;--card:#111a20;--muted:#9fb3bd;--text:#ffffff;--accent:#00eaff;--accent2:#008cff;--error:#ff6b81;--ok:#29d39a;--warn:#ffb703;--bd:rgba(255,255,255,.08);--bd2:rgba(255,255,255,.14);--shadow:0 10px 30px rgba(0,0,0,.35);--r:16px}
+    *{box-sizing:border-box}html,body{height:100%}body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,sans-serif;background:
+      radial-gradient(1200px 800px at 0% 0%, rgba(0,234,255,.08), transparent 60%),
+      radial-gradient(800px 600px at 100% 100%, rgba(0,140,255,.10), transparent 50%),var(--bg);color:var(--text);font-weight:700}
+    header{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:var(--panel);border-bottom:1px solid var(--bd);position:sticky;top:0;z-index:50}
+    .brand{display:flex;gap:12px;align-items:center}
+    .logo{width:42px;height:42px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:12px;display:grid;place-items:center;color:#001014;font-weight:900;box-shadow:0 0 10px rgba(0,200,255,.5);font-size:24px}
+    .stats{display:flex;gap:10px;flex-wrap:wrap}.chip{background:var(--card);border:1px solid var(--bd);border-radius:999px;padding:6px 10px;color:var(--text);font-size:13px}
+    .userpill{background:transparent;border:1px solid var(--bd);border-radius:999px;padding:6px 10px;color:var(--text);font-size:13px}
+    .logout{background:transparent;border:1px solid var(--bd);color:var(--text);padding:6px 10px;border-radius:10px;cursor:pointer}.logout:hover{border-color:var(--accent)}
+    .content{display:grid;grid-template-columns:240px 1fr;gap:16px;max-width:1400px;margin:18px auto;width:100%;padding:0 16px}
+    nav{background:var(--panel);border:1px solid var(--bd);border-radius:var(--r);padding:10px;height:max-content;position:sticky;top:80px}
+    .nav-title{margin:6px 10px 10px;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.12em}
+    .tab{width:100%;text-align:left;padding:10px 12px;border:1px solid var(--bd);background:transparent;border-radius:12px;color:var(--text);cursor:pointer;margin:6px 8px;display:flex;align-items:center;gap:10px}
+    .tab.active{background:linear-gradient(135deg,rgba(0,234,255,.18),rgba(0,140,255,.14));border-color:transparent}
+    main{display:grid;gap:16px}.card{background:var(--card);border:1px solid var(--bd);border-radius:var(--r);padding:16px;box-shadow:var(--shadow)}
+    h2{margin:0 0 12px;font-size:18px;color:var(--accent)}.bar{display:grid;grid-template-columns:repeat(12,1fr);gap:10px;margin-bottom:12px}
+    .col-2{grid-column:span 2}.col-3{grid-column:span 3}.col-4{grid-column:span 4}.col-6{grid-column:span 6}.col-12{grid-column:span 12}
+    @media (max-width:960px){.content{grid-template-columns:1fr}nav{position:static}.col-2,.col-3,.col-4,.col-6{grid-column:span 12}}
+    label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}input,select{width:100%;padding:10px 12px;border-radius:12px;border:1px solid var(--bd);background:#0e151a;color:var(--text)}
+    input:focus,select:focus{outline:none;border-color:var(--accent)}.btn{padding:10px 14px;border-radius:12px;border:none;background:var(--accent);color:#001014;font-weight:900;cursor:pointer;box-shadow:var(--shadow)}
+    .btn:hover{background:var(--accent2)}.btn.ghost{background:transparent;border:1px solid var(--bd);color:var(--text);box-shadow:none}.btn.bad{background:var(--error)}
+    table{width:100%;border-collapse:collapse}th,td{padding:10px;border-bottom:1px solid var(--bd);text-align:left}th{color:#d7eef1;background:#0e1519;position:sticky;top:0}
+    tbody tr:hover{background:rgba(255,255,255,.03)}.no{color:#e3eef2;font-style:italic;padding:20px;text-align:center}
+    .badge{padding:4px 8px;border-radius:999px;font-weight:900;font-size:12px;border:1px solid var(--bd2)}.paid{background:#0d2d28;color:#46e2b2}.pending{background:#2b1b11;color:#ffb38a}
+    .scroll{max-height:360px;overflow:auto;border:1px solid var(--bd);border-radius:12px}.toast{position:fixed;right:16px;bottom:16px;background:var(--panel);border:1px solid var(--bd);border-left:4px solid var(--accent);padding:12px 14px;border-radius:12px;box-shadow:var(--shadow);display:none}
+    .note{color:#e3eef2;font-size:13px;margin-bottom:10px}
+    .diagnosis-cell[contenteditable="true"]{background:rgba(255,255,255,0.08);outline:1px dashed rgba(255,255,255,0.35);border-radius:8px;padding:4px 6px}
+    .row-actions{display:none;gap:6px}tr.editing .row-actions{display:inline-flex}
+  </style>
+</head>
+<body>
+  <header id="hdr" style="display:none">
+    <div class="brand">
+      <div class="logo">🏥</div>
+      <div>
+        <div style="font-weight:900; font-size:20px;">CarePlus Multispeciality Hospital</div>
+        <div style="font-size:12px; color:var(--muted);">Patient Record & Billing Management System</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center">
+      <div class="stats" id="stats"><div class="chip">Loading stats…</div></div>
+      <div id="who" class="userpill"></div>
+      <button class="logout" onclick="logout()">Logout</button>
+    </div>
+  </header>
+
+  <!-- LOGIN -->
+  <div id="login" class="center" style="min-height:70vh;display:grid;place-items:center">
+    <div class="login-card" style="width:min(520px,92vw);background:#0f151a;border:1px solid var(--bd);border-radius:18px;padding:20px;box-shadow:var(--shadow)">
+      <div style="display:flex;gap:10px;align-items:center;margin-bottom:8px">
+        <div class="logo">🏥</div>
+        <div><div style="font-weight:800;font-size:18px">Welcome</div>
+          <div style="font-size:12px;color:var(--muted)">Login using your <b>database ID</b></div></div>
+      </div>
+      <div class="bar">
+        <div class="col-12">
+          <label>Role</label>
+          <select id="lg-role">
+            <option value="">Choose a role</option>
+            <option>Doctor</option>
+            <option>Nurse</option>
+            <option>Patient</option>
+            <option>Accountant</option>
+          </select>
+        </div>
+        <div class="col-12">
+          <label id="id-label">Enter ID</label>
+          <input id="lg-id" placeholder="DoctorID D101 / NurseID N005 / PatientID P001"/>
+        </div>
+        <div class="col-12" style="display:flex;gap:8px;justify-content:flex-end">
+          <button class="btn" onclick="doLogin()">Login</button>
+        </div>
+      </div>
+      <div class="note" id="hint">Select a role to see which ID to use. (Accountant uses <b>PatientID</b>.)</div>
+      <div id="login-err" style="color:#ff9090;font-size:12px;display:none">ID not found in database for the selected role.</div>
+    </div>
+  </div>
+
+  <!-- APP -->
+  <div id="app" class="content" style="display:none">
+    <nav>
+      <div class="nav-title">Sections</div>
+      <button class="tab" data-tab="dashboard" style="display:none">📊 Dashboard</button>
+      <button class="tab" data-tab="patients" style="display:none">🧑‍🤝‍🧑 Patients</button>
+      <button class="tab" data-tab="visits" style="display:none">📋 Visits</button>
+      <button class="tab" data-tab="treatments" style="display:none">💊 Treatments</button>
+      <button class="tab" data-tab="meds" style="display:none">🧪 Medications</button>
+      <button class="tab" data-tab="payments" style="display:none">💳 Payments</button>
+      <button class="tab" data-tab="records" style="display:none">🗂 Records</button>
+      <button class="tab" data-tab="analytics" style="display:none">📈 Analytics</button>
+    </nav>
+
+    <main>
+      <section class="card section" id="section-dashboard" style="display:none">
+        <h2>Patient Dashboard</h2>
+        <div class="note">View your profile, visits, treatments, records and payments. Filter visits by DoctorID if needed.</div>
+        <div class="bar">
+          <div class="col-3 pid-input"><label>Your Patient ID</label><input id="db-pid" disabled/></div>
+          <div class="col-3"><label>Filter by Doctor ID (optional)</label><input id="db-did" placeholder="e.g., D101"/></div>
+          <div class="col-2" style="align-self:end"><button class="btn" onclick="loadDashboard()">Reload</button></div>
+        </div>
+        <div id="db-out"></div>
+      </section>
+
+      <section class="card section" id="section-patients" style="display:none">
+        <h2>Patients</h2>
+        <div class="note">Search by <b>PatientID</b> or <b>Name</b>. Doctors/Nurses can <b>delete</b> a discharged patient.</div>
+        <div class="bar">
+          <div class="col-4"><label>Search by Name</label><input id="p-name" placeholder="e.g., Priya Gupta"/></div>
+          <div class="col-3"><label>Or Patient ID</label><input id="p-id" placeholder="e.g., P012"/></div>
+          <div class="col-2" style="align-self:end"><button class="btn" onclick="searchPatients()">Search</button></div>
+        </div>
+        <div id="p-res" class="table"><div class="no">No data — add filters above.</div></div>
+        <div style="margin-top:10px;display:flex;gap:8px">
+          <button class="btn" id="btn-add-patient" style="display:none" onclick="openAddPatient()">+ Add Patient</button>
+        </div>
+        <div id="addp" style="display:none;margin-top:10px">
+          <div class="bar">
+            <div class="col-4"><label>Name</label><input id="ap-name"/></div>
+            <div class="col-2"><label>Age</label><input id="ap-age" type="number" min="0" max="120"/></div>
+            <div class="col-2"><label>Gender</label><select id="ap-gender"><option>Male</option><option>Female</option><option>Other</option></select></div>
+            <div class="col-4"><label>Contact</label><input id="ap-contact" placeholder="10-15 digits"/></div>
+            <div class="col-2" style="align-self:end"><button class="btn" onclick="addPatient()">Save</button></div>
+          </div>
+          <div class="note">ID auto-generated like <b>P097</b> by DB trigger.</div>
+        </div>
+      </section>
+
+      <section class="card section" id="section-visits" style="display:none">
+        <h2>Visits</h2>
+        <div class="bar">
+          <div class="col-3 pid-input"><label>Patient ID</label><input id="v-pid" placeholder="P001"/></div>
+          <div class="col-3 did-input"><label>Doctor ID</label><input id="v-did" placeholder="D101"/></div>
+          <div class="col-2" style="align-self:end"><button class="btn" onclick="searchVisits()">Search</button></div>
+        </div>
+        <div id="v-res" class="table"><div class="no">No data</div></div>
+        <div style="margin-top:10px;display:flex;gap:8px">
+          <button class="btn" id="btn-add-visit" style="display:none" onclick="openAddVisit()">+ Add Visit</button>
+        </div>
+        <div id="addv" style="display:none;margin-top:10px">
+          <div class="bar">
+            <div class="col-3"><label>Patient ID</label><input id="av-pid"/></div>
+            <div class="col-3"><label>Doctor ID</label><input id="av-did"/></div>
+            <div class="col-3"><label>Visit Date</label><input id="av-dt" placeholder="YYYY-MM-DD HH:MM:SS"/></div>
+            <div class="col-3"><label>Diagnosis</label><input id="av-dx"/></div>
+            <div class="col-2" style="align-self:end"><button class="btn" onclick="addVisit()">Save</button></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card section" id="section-treatments" style="display:none">
+        <h2>Treatments</h2>
+        <div class="bar">
+          <div class="col-3 pid-input"><label>Patient ID</label><input id="t-pid" placeholder="P001"/></div>
+          <div class="col-2" style="align-self:end"><button class="btn" onclick="searchTreatments()">Search</button></div>
+        </div>
+        <div id="t-res" class="table"><div class="no">No data</div></div>
+        <div style="margin-top:10px;display:flex;gap:8px">
+          <button class="btn" id="btn-add-treatment" style="display:none" onclick="openAddTreatment()">+ Add Treatment</button>
+        </div>
+        <div id="addt" style="display:none;margin-top:10px">
+          <div class="bar">
+            <div class="col-2"><label>Visit ID</label><input id="at-vid"/></div>
+            <div class="col-3"><label>Medication ID (optional)</label><input id="at-mid"/></div>
+            <div class="col-5"><label>Notes</label><input id="at-notes"/></div>
+            <div class="col-2" style="align-self:end"><button class="btn" onclick="addTreatment()">Save</button></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card section" id="section-meds" style="display:none">
+        <h2>Medications</h2>
+        <div class="bar">
+          <div class="col-4"><label>Name</label><input id="m-name"/></div>
+          <div class="col-2" style="align-self:end"><button class="btn" onclick="searchMeds()">Search</button></div>
+        </div>
+        <div id="m-res" class="table"><div class="no">No data</div></div>
+      </section>
+
+      <section class="card section" id="section-payments" style="display:none">
+        <h2>Payments</h2>
+        <div class="bar">
+          <div class="col-3 pid-input"><label>Patient ID</label><input id="pay-pid" placeholder="P001"/></div>
+          <div class="col-2" style="align-self:end"><button class="btn" onclick="searchPayments()">Search</button></div>
+        </div>
+        <div id="pay-res" class="table"><div class="no">No data</div></div>
+      </section>
+
+      <section class="card section" id="section-records" style="display:none">
+        <h2>Records</h2>
+        <div class="bar">
+          <div class="col-3 pid-input"><label>Patient ID</label><input id="r-pid" placeholder="P001"/></div>
+          <div class="col-3 did-input"><label>Doctor ID</label><input id="r-did" placeholder="D101 (optional)"/></div>
+          <div class="col-2" style="align-self:end"><button class="btn" onclick="searchRecords()">Search</button></div>
+        </div>
+        <div id="r-res" class="table"><div class="no">No data</div></div>
+      </section>
+
+      <section class="card section" id="section-analytics" style="display:none">
+        <h2>Analytics</h2>
+        <div class="bar">
+          <div class="col-3"><button class="btn" onclick="loadVisitsByDoctor()">Visits by Doctor</button></div>
+          <div class="col-3"><button class="btn" onclick="loadRevenueByStatus()">Revenue by Status</button></div>
+        </div>
+        <div id="an-res" class="table"><div class="no">Run a report</div></div>
+      </section>
+    </main>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+<script>
+const API='http://localhost:5000'; const $=id=>document.getElementById(id);
+function toast(msg){const t=$('toast');t.textContent=msg;t.style.display='block';setTimeout(()=>t.style.display='none',2200);}
+function logout(){sessionStorage.clear();location.reload();}
+
+document.addEventListener('click',e=>{
+  if(!e.target.classList.contains('tab')) return;
+  const tab=e.target.dataset.tab;
+  document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));
+  document.querySelectorAll('.section').forEach(sec=>sec.style.display='none');
+  $('section-'+tab).style.display='block';
+});
+
+$('lg-role').addEventListener('change',()=>{
+  const r=$('lg-role').value, L=$('id-label'), H=$('hint'); $('lg-id').value='';
+  if(r==='Doctor'){L.textContent='Enter DoctorID (e.g., D101)'; H.textContent='Verified via /doctors?id=D101';}
+  else if(r==='Nurse'){L.textContent='Enter NurseID (e.g., N005)'; H.textContent='Verified via /nurses?id=N005';}
+  else if(r==='Patient' || r==='Accountant'){L.textContent='Enter PatientID (e.g., P001)'; H.textContent='Verified via /patients?id=P001';}
+  else {L.textContent='Enter ID'; H.textContent='Select a role.';}
+});
+
+async function doLogin(){
+  const role=$('lg-role').value.trim(), id=$('lg-id').value.trim(); $('login-err').style.display='none';
+  if(!role || !id){$('login-err').textContent='Select role and enter ID.';$('login-err').style.display='block';return;}
+  try{
+    let ok=false, display='', pid='';
+    if(role==='Doctor'){
+      const rows=await (await fetch(`${API}/doctors?id=${encodeURIComponent(id)}`)).json();
+      ok = Array.isArray(rows) && rows.length>0; if(ok){display=rows[0].Name;}
+    }else if(role==='Nurse'){
+      const rows=await (await fetch(`${API}/nurses?id=${encodeURIComponent(id)}`)).json();
+      ok = Array.isArray(rows) && rows.length>0; if(ok){display=rows[0].Name;}
+    }else if(role==='Patient' || role==='Accountant'){
+      const rows=await (await fetch(`${API}/patients?id=${encodeURIComponent(id)}`)).json();
+      ok = Array.isArray(rows) && rows.length>0; if(ok){display=rows[0].Name; pid=rows[0].PatientID;}
+    }
+    if(!ok){$('login-err').textContent='ID not found for the selected role.';$('login-err').style.display='block';return;}
+    sessionStorage.setItem('userRole', role);
+    sessionStorage.setItem('displayName', display || role);
+    if(pid) sessionStorage.setItem('patientId', pid);
+    $('who').textContent=`${display||role} (${role})`;
+    $('login').style.display='none'; document.getElementById('hdr').style.display='flex'; document.getElementById('app').style.display='grid';
+    setupRole(role); loadStats();
+  }catch(e){
+    $('login-err').textContent='Login check failed. Is backend running?';$('login-err').style.display='block';
+  }
+}
+
+function setupRole(role){
+  const tabs={
+    'Doctor':['patients','visits','treatments','records'],
+    'Nurse':['patients','visits','treatments','records'],
+    'Patient':['dashboard','visits','payments','records'],
+    'Accountant':['payments','visits','treatments','analytics']
+  };
+  const allowed=new Set(tabs[role]||[]);
+  document.querySelectorAll('nav .tab').forEach(btn=>{const t=btn.dataset.tab;btn.style.display=allowed.has(t)?'block':'none';btn.classList.remove('active');});
+  document.querySelectorAll('.section').forEach(sec=>sec.style.display='none');
+  const first=[...allowed][0]; if(first){document.querySelector(`.tab[data-tab="${first}"]`).classList.add('active');document.getElementById('section-'+first).style.display='block';}
+
+  const isPatient=role==='Patient'; const pid=sessionStorage.getItem('patientId')||'';
+  document.querySelectorAll('.pid-input input').forEach(inp=>{ if(isPatient){inp.value=pid;inp.setAttribute('disabled','disabled');} else {inp.removeAttribute('disabled');}});
+  if(isPatient){ $('db-pid').value = pid; loadDashboard(); }
+
+  const canAdd = (role==='Doctor' || role==='Nurse');
+  const canDelete = canAdd;
+  if(document.getElementById('btn-add-patient')) document.getElementById('btn-add-patient').style.display = canAdd?'inline-block':'none';
+  if(document.getElementById('btn-add-visit')) document.getElementById('btn-add-visit').style.display = canAdd?'inline-block':'none';
+  if(document.getElementById('btn-add-treatment')) document.getElementById('btn-add-treatment').style.display = canAdd?'inline-block':'none';
+  window.allowDeletePatients = canDelete;
+}
+
+async function getJSON(url){const r=await fetch(url);if(!r.ok) throw new Error(await r.text());return r.json();}
+async function postJSON(url,body){const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});if(!r.ok) throw new Error(await r.text());return r.json();}
+async function patchJSON(url,body){const r=await fetch(url,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});if(!r.ok) throw new Error(await r.text());return r.json();}
+
+async function loadStats(){try{const s=await getJSON(API+'/stats');$('stats').innerHTML=`<div class="chip">👥 Patients <b>${s.patients}</b></div><div class="chip">🩺 Doctors <b>${s.doctors}</b></div><div class="chip">📋 Visits <b>${s.visits}</b></div><div class="chip">💰 Revenue <b>₹${(+s.revenue).toFixed(2)}</b></div>`;}catch{$('stats').innerHTML='<div class="chip">Stats failed</div>';}} 
+
+async function loadDashboard(){
+  const pid=$('db-pid').value.trim(); const did=$('db-did').value.trim();
+  let url=`${API}/profile?patientId=${encodeURIComponent(pid)}`;
+  if(did) url += `&doctorId=${encodeURIComponent(did)}`;
+  const res=await getJSON(url);
+  if(!res.ok || !res.patient){ $('db-out').innerHTML = '<div class="no">Patient not found</div>'; return; }
+  const p=res.patient;
+  const head = `<div class="card"><b>${p.PatientID}</b> — ${p.Name} (${p.Gender}, ${p.Age}) • ${p.ContactNumber}</div>`;
+  const visits = (res.visits||[]).map(v=>`<tr><td>${v.VisitID}</td><td>${v.VisitDate}</td><td>${v.DoctorName} (${v.DoctorID})</td><td>${v.Diagnosis||''}</td></tr>`).join('') || '<tr><td colspan="4" class="no">No visits</td></tr>';
+  const treat = (res.treatments||[]).map(t=>`<tr><td>${t.TreatmentID}</td><td>${t.VisitID}</td><td>${t.MedicationName||''} ${t.Dosage||''}</td><td>${t.Notes||''}</td></tr>`).join('') || '<tr><td colspan="4" class="no">No treatments</td></tr>';
+  const recs = (res.records||[]).map(r=>`<tr><td>${r.RecordID}</td><td>${r.Title}</td><td>${r.DoctorName||''}</td><td>${r.CreatedOn}</td></tr>`).join('') || '<tr><td colspan="4" class="no">No records</td></tr>';
+  const pays = (res.payments||[]).map(p=>`<tr><td>${p.PaymentID}</td><td>₹${(+p.Amount).toFixed(2)}</td><td>${p.Status}</td><td>${p.PaidOn||''}</td></tr>`).join('') || '<tr><td colspan="4" class="no">No payments</td></tr>';
+  $('db-out').innerHTML = head + `
+  <div class="bar">
+    <div class="col-6"><div class="scroll"><table><thead><tr><th colspan="4">Visits</th></tr><tr><th>VisitID</th><th>Date</th><th>Doctor</th><th>Diagnosis</th></tr></thead><tbody>${visits}</tbody></table></div></div>
+    <div class="col-6"><div class="scroll"><table><thead><tr><th colspan="4">Treatments/Medications</th></tr><tr><th>TrID</th><th>VisitID</th><th>Medication</th><th>Notes</th></tr></thead><tbody>${treat}</tbody></table></div></div>
+    <div class="col-6"><div class="scroll"><table><thead><tr><th colspan="4">Records</th></tr><tr><th>RecID</th><th>Title</th><th>Doctor</th><th>Created</th></tr></thead><tbody>${recs}</tbody></table></div></div>
+    <div class="col-6"><div class="scroll"><table><thead><tr><th colspan="4">Payments</th></tr><tr><th>ID</th><th>Amount</th><th>Status</th><th>PaidOn</th></tr></thead><tbody>${pays}</tbody></table></div></div>
+  </div>`;
+}
+
+function openAddPatient(){document.getElementById('addp').style.display='block';}
+async function searchPatients(){
+  const name=document.getElementById('p-name').value.trim(), id=document.getElementById('p-id').value.trim();
+  if(!name && !id){document.getElementById('p-res').innerHTML='<div class="no">Enter a name or PatientID to search.</div>'; return;}
+  let url=API+'/patients'; if(id) url+='?id='+encodeURIComponent(id); else if(name) url+='?name='+encodeURIComponent(name);
+  const data=await getJSON(url); renderPatients(data);
+}
+function renderPatients(items){
+  if(!items.length){document.getElementById('p-res').innerHTML='<div class="no">No rows</div>';return;}
+  const delcol = window.allowDeletePatients ? '<th style="text-align:right">Actions</th>' : '';
+  const rows=items.map(p=>{
+    const btn = window.allowDeletePatients ? `<button class="btn bad" onclick="delPatient('${p.PatientID}')">Delete</button>` : '';
+    return `<tr><td>${p.PatientID}</td><td>${p.Name}</td><td>${p.Age??''}</td><td>${p.Gender??''}</td><td>${p.ContactNumber??''}</td>${window.allowDeletePatients?`<td style="text-align:right">${btn}</td>`:''}</tr>`;
+  }).join('');
+  document.getElementById('p-res').innerHTML=`<div class="scroll"><table><thead><tr><th>PatientID</th><th>Name</th><th>Age</th><th>Gender</th><th>Contact</th>${delcol}</tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+async function addPatient(){
+  const name=document.getElementById('ap-name').value.trim(), age=document.getElementById('ap-age').value.trim(), gender=document.getElementById('ap-gender').value, contact=document.getElementById('ap-contact').value.trim();
+  if(!name || !age || !gender || !contact){toast('All fields required');return;}
+  if(!/^\\d{10,15}$/.test(contact)){toast('Contact must be 10-15 digits');return;}
+  await postJSON(API+'/patients',{Name:name,Age:+age,Gender:gender,ContactNumber:contact});
+  toast('Patient added'); document.getElementById('addp').style.display='none';
+}
+async function delPatient(pid){
+  if(!confirm(`Delete patient ${pid}? This also deletes their visits/treatments/records/payments.`)) return;
+  await fetch(`${API}/patients/${encodeURIComponent(pid)}`, {method:'DELETE'});
+  toast('Patient deleted'); searchPatients(); loadStats();
+}
+
+function openAddVisit(){document.getElementById('addv').style.display='block';}
+async function searchVisits(){
+  let url=API+'/visits'; const pid=document.getElementById('v-pid').value.trim(), did=document.getElementById('v-did').value.trim(); const qs=[];
+  if(!pid && !did){document.getElementById('v-res').innerHTML='<div class="no">Enter PatientID or DoctorID to search.</div>'; return;}
+  if(pid) qs.push('patientId='+encodeURIComponent(pid)); if(did) qs.push('doctorId='+encodeURIComponent(did));
+  if(qs.length) url+='?'+qs.join('&'); const data=await getJSON(url);
+  renderVisits(data);
+}
+function renderVisits(data){
+  if(!data.length){document.getElementById('v-res').innerHTML='<div class="no">No rows</div>';return;}
+  const canEdit = ['Doctor','Nurse'].includes(sessionStorage.getItem('userRole') || '');
+  const rows = data.map(v => {
+    const dx = (v.Diagnosis ?? '');
+    const dxCell = canEdit
+      ? `<td class="diagnosis-cell" data-visit-id="${v.VisitID}" contenteditable="true">${escapeHtml(dx)}</td>`
+      : `<td>${escapeHtml(dx)}</td>`;
+    const actions = canEdit
+      ? `<td style="text-align:right"><div class="row-actions">
+           <button class="btn" onclick="saveDx(${v.VisitID})">Save</button>
+           <button class="btn ghost" onclick="cancelDx(${v.VisitID})">Cancel</button>
+         </div></td>`
+      : `<td></td>`;
+    return `<tr id="row-${v.VisitID}">
+      <td>${v.VisitID}</td><td>${v.PatientID}</td><td>${escapeHtml(v.PatientName)}</td>
+      <td>${v.DoctorID}</td><td>${escapeHtml(v.DoctorName)}</td><td>${v.VisitDate}</td>
+      ${dxCell}${actions}
+    </tr>`;
+  }).join('');
+  document.getElementById('v-res').innerHTML=`<div class="scroll"><table><thead>
+    <tr><th>VisitID</th><th>PatientID</th><th>Patient</th><th>DoctorID</th><th>Doctor</th><th>Date</th><th>Diagnosis</th><th>Actions</th></tr>
+  </thead><tbody>${rows}</tbody></table></div>`;
+  if (canEdit) attachInlineEditHandlers();
+}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));}
+function attachInlineEditHandlers(){
+  document.querySelectorAll('.diagnosis-cell').forEach(cell => {
+    const row = cell.closest('tr');
+    cell.dataset.original = cell.textContent;
+    cell.addEventListener('focus', () => row.classList.add('editing'));
+    cell.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); saveDx(cell.dataset.visitId); }
+      if (e.key === 'Escape') { e.preventDefault(); cancelDx(cell.dataset.visitId); }
+    });
+    cell.addEventListener('blur', () => {
+      if (cell.textContent.trim() !== (cell.dataset.original || '').trim()) saveDx(cell.dataset.visitId);
+      else row.classList.remove('editing');
+    });
+  });
+}
+async function saveDx(visitId){
+  const cell = document.querySelector(`.diagnosis-cell[data-visit-id="${visitId}"]`);
+  const row  = document.getElementById(`row-${visitId}`);
+  const newDx = cell.textContent.trim();
+  if (!newDx) { toast('Diagnosis cannot be empty'); return; }
+  try{
+    await fetch(`${API}/visits/${visitId}/diagnosis`, {method:'PATCH',headers:{'Content-Type':'application/json'},body: JSON.stringify({ Diagnosis: newDx })});
+    cell.dataset.original = newDx; row.classList.remove('editing'); toast('Diagnosis updated');
+  }catch(err){
+    cell.textContent = cell.dataset.original || ''; row.classList.remove('editing'); toast('Update failed');
+  }
+}
+function cancelDx(visitId){
+  const cell = document.querySelector(`.diagnosis-cell[data-visit-id="${visitId}"]`);
+  const row  = document.getElementById(`row-${visitId}`);
+  cell.textContent = cell.dataset.original || ''; row.classList.remove('editing');
+}
+
+async function searchTreatments(){
+  const pid=document.getElementById('t-pid').value.trim(); if(!pid){document.getElementById('t-res').innerHTML='<div class="no">Enter PatientID</div>';return;}
+  const data=await getJSON(`${API}/treatments?patientId=${encodeURIComponent(pid)}`);
+  if(!data.length){document.getElementById('t-res').innerHTML='<div class="no">No rows</div>';return;}
+  const rows=data.map(t=>`<tr><td>${t.TreatmentID}</td><td>${t.VisitID}</td><td>${t.PatientID}</td><td>${t.DoctorID}</td><td>${t.MedicationName??''}</td><td>${t.Dosage??''}</td><td>${t.Notes??''}</td></tr>`).join('');
+  document.getElementById('t-res').innerHTML=`<div class="scroll"><table><thead><tr><th>TreatmentID</th><th>VisitID</th><th>PatientID</th><th>DoctorID</th><th>Medication</th><th>Dosage</th><th>Notes</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+
+async function searchMeds(){
+  const name=document.getElementById('m-name').value.trim();
+  let url=API+'/medications'; if(name) url+=`?name=${encodeURIComponent(name)}`;
+  const data=await getJSON(url);
+  if(!data.length){document.getElementById('m-res').innerHTML='<div class="no">No rows</div>';return;}
+  const rows=data.map(m=>`<tr><td>${m.MedicationID}</td><td>${m.Name}</td><td>${m.Dosage}</td></tr>`).join('');
+  document.getElementById('m-res').innerHTML=`<div class="scroll"><table><thead><tr><th>MedicationID</th><th>Name</th><th>Dosage</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+
+async function searchPayments(){
+  const pid=document.getElementById('pay-pid').value.trim(); if(!pid){document.getElementById('pay-res').innerHTML='<div class="no">Enter PatientID</div>';return;}
+  const data=await getJSON(`${API}/payments?patientId=${encodeURIComponent(pid)}`);
+  if(!data.length){document.getElementById('pay-res').innerHTML='<div class="no">No rows</div>';return;}
+  const rows=data.map(p=>{
+    const cls=p.Status==='Paid'?'badge paid':'badge pending';
+    const mark = p.Status!=='Paid' ? `<button class="btn" onclick="markPaid(${p.PaymentID})">Mark Paid</button>` : '';
+    return `<tr><td>${p.PaymentID}</td><td>${p.PatientID}</td><td>${p.PatientName}</td><td>${p.VisitID??''}</td><td>₹${(+p.Amount).toFixed(2)}</td><td>${p.PaidOn||''}</td><td><span class="${cls}">${p.Status}</span></td><td style="text-align:right">${mark}</td></tr>`;
+  }).join('');
+  document.getElementById('pay-res').innerHTML=`<div class="scroll"><table><thead><tr><th>PaymentID</th><th>PatientID</th><th>Patient</th><th>VisitID</th><th>Amount</th><th>PaidOn</th><th>Status</th><th>Actions</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+async function markPaid(id){
+  await patchJSON(`${API}/payments/${id}/markPaid`, {});
+  toast('Marked as Paid'); searchPayments(); loadStats();
+}
+
+async function searchRecords(){
+  const pid=document.getElementById('r-pid').value.trim(), did=document.getElementById('r-did').value.trim();
+  if(!pid && !did){document.getElementById('r-res').innerHTML='<div class="no">Enter PatientID (and optionally DoctorID)</div>';return;}
+  let url=API+'/records'; const qs=[]; if(pid) qs.push('patientId='+encodeURIComponent(pid)); if(did) qs.push('doctorId='+encodeURIComponent(did));
+  if(qs.length) url+='?'+qs.join('&'); const data=await getJSON(url);
+  if(!data.length){document.getElementById('r-res').innerHTML='<div class="no">No rows</div>';return;}
+  const rows=data.map(r=>`<tr><td>${r.RecordID}</td><td>${r.PatientID}</td><td>${r.PatientName}</td><td>${r.DoctorID??''}</td><td>${r.DoctorName??''}</td><td>${r.Title}</td><td>${r.CreatedOn}</td></tr>`).join('');
+  document.getElementById('r-res').innerHTML=`<div class="scroll"><table><thead><tr><th>RecordID</th><th>PatientID</th><th>Patient</th><th>DoctorID</th><th>Doctor</th><th>Title</th><th>CreatedOn</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+</script>
+</body>
+</html>
