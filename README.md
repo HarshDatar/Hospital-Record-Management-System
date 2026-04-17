@@ -75,4 +75,4 @@ The system relies on a clean REST API structure:
 **Harsh Anant Datar** *B.Tech Computer Science & Engineering | MIT ADT University*
 
 ---
-our main page. The combination of Python and SQL makes this an excellent project to show recruiters your "Full-Stack" capabilities!
+
